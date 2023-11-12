@@ -3,7 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
+#include "GameFramework/Actor.h"
+#include "PCGRoom.generated.h"
 
 UENUM(BlueprintType)
 enum class ERoomType : uint8
@@ -19,6 +20,7 @@ enum class ERoomType : uint8
 USTRUCT(BlueprintType)
 struct FLayout
 {
+	GENERATED_BODY()
 	float X0;
 	float X1;
 	float Y0;
@@ -26,24 +28,28 @@ struct FLayout
 };
 
 UCLASS()
-class PCG_BUILDING_API UPCGRoom: public UObject
+class PCG_BUILDING_API APCGRoom : public AActor
 {
 	GENERATED_BODY()
-public:
-	UFUNCTION(BlueprintReadWrite, EditAnywhere, Category="EDIT ROOM PARAMS")
+	
+public:	
+	// Sets default values for this actor's properties
+	APCGRoom();
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="EDIT ROOM PARAMS")
 	FLayout Rectangle;
 	
-	UFUNCTION(BlueprintReadWrite, EditAnywhere, Category="EDIT ROOM PARAMS")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="EDIT ROOM PARAMS")
 	ERoomType Type;
 	
-	UFUNCTION(BlueprintReadWrite, EditAnywhere, Category="EDIT ROOM PARAMS")
-	TArray<UPCGRoom*> Children;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="EDIT ROOM PARAMS")
+	TArray<APCGRoom*> RoomChildren;
 	
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	float Width;
 	
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	float Breadth;
+	float Length;
 	
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	float Area;
@@ -51,25 +57,28 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	float ShorterSide;
 
-	float SumChildrenValues();
+	UFUNCTION(BlueprintCallable, Category="Room Functions")
+	float SumChildrenAreas();
 	
+	UFUNCTION(BlueprintCallable, Category="Room Functions")
 	float MaxChildrenValue();
 	
+	UFUNCTION(BlueprintCallable, Category="Room Functions")
 	float MinChildrenValue();
 	
+	UFUNCTION(BlueprintCallable, Category="Room Functions")
 	float MaxAspectRatioInRow();
 	
-	float FitRowIntoContainer();
-
+	UFUNCTION(BlueprintCallable, Category="Room Functions")
+	void FitRowIntoContainer(const TArray<float>& ChildrenAreaArray, FLayout NewRectangle);
 	
+	UFUNCTION(BlueprintCallable, Category="Room Functions")
 	TArray<float> GetArrayOfChildrenAreas();
-	
-	UPCGRoom();
-	
-	UPCGRoom(FLayout Rectangle, const ERoomType Type);
-	
-	~UPCGRoom();
-	
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
 private:
 	static float SumFloat(const TArray<float>& Numbers);
 	static int SumInt(const TArray<int>& Numbers);

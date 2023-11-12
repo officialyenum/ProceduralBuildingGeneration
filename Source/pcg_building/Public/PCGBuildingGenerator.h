@@ -3,28 +3,33 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
 #include "Rooms/PCGRoom.h"
+#include "PCGBuildingGenerator.generated.h"
 
-/**
- * 
- */
 UCLASS()
-class PCG_BUILDING_API UPCGBuildingGenerator: public UObject
+class PCG_BUILDING_API APCGBuildingGenerator : public AActor
 {
-	
 	GENERATED_BODY()
-public:
+	
+public:	
+	// Sets default values for this actor's properties
+	APCGBuildingGenerator();
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	UPCGRoom* RoomRootNode;
+	APCGRoom* RoomRootNode;
 	
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	float Area;
 	
-	UPCGBuildingGenerator();
 	UFUNCTION(BlueprintCallable, Category="Building Generator")
 	void GenerateBuildingLayout();
 	
 	UFUNCTION(BlueprintCallable, Category="Building Generator")
-	void GenerateLayoutWithSquarifiedAlgo(UPCGRoom* CurrentRoomNode);
-	~UPCGBuildingGenerator();
+	void GenerateLayoutWithSquarifiedAlgo(APCGRoom* CurrentRoomNode);
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+	
+
 };

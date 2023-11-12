@@ -3,25 +3,37 @@
 
 #include "Rooms/PCGRoom.h"
 
-#include "DSP/Chorus.h"
+// Sets default values
+APCGRoom::APCGRoom()
+{
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = false;
+	Rectangle.X0 = 0;
+	Rectangle.X1 = 4;
+	Rectangle.Y0 = 0;
+	Rectangle.Y1 = 6;
+	Width = Rectangle.X1 - Rectangle.X0;
+	Length = Rectangle.Y1 - Rectangle.Y0;
+	ShorterSide = FMath::Abs(Width) < FMath::Abs(Length) ? Width : Length;
+	Area = Width * Length;
+}
 
-
-float UPCGRoom::SumChildrenValues()
+float APCGRoom::SumChildrenAreas()
 {
 	// Recursion through children nodes
 	float Sum = Area;
-	for (UPCGRoom* Child: Children)
+	for (APCGRoom* Child: RoomChildren)
 	{
-		Sum += Child->SumChildrenValues();
+		Sum += Child->SumChildrenAreas();
 	}
 	return Sum;
 }
 
-float UPCGRoom::MaxChildrenValue()
+float APCGRoom::MaxChildrenValue()
 {
 	// Recursion through children nodes
 	float Max = Area;
-	for (UPCGRoom* Child: Children)
+	for (APCGRoom* Child: RoomChildren)
 	{
 		if(const float ChildMax = Child->MaxChildrenValue(); ChildMax > Max)
 		{
@@ -31,11 +43,11 @@ float UPCGRoom::MaxChildrenValue()
 	return Max;
 }
 
-float UPCGRoom::MinChildrenValue()
+float APCGRoom::MinChildrenValue()
 {
 	// Recursion through children nodes
 	float Min = Area;
-	for (UPCGRoom* Child: Children)
+	for (APCGRoom* Child: RoomChildren)
 	{
 		if(const float ChildMin = Child->MinChildrenValue(); ChildMin < Min)
 		{
@@ -49,7 +61,7 @@ float UPCGRoom::MinChildrenValue()
  * @brief
  * @return max ((ShorterSide^2 * MaxRow)/SumRow^2,(SumRow^2/(ShorterSide^2 * MinRow))
  */
-float UPCGRoom::MaxAspectRatioInRow()
+float APCGRoom::MaxAspectRatioInRow()
 {
 	TArray<float> ValueInRow = this->GetArrayOfChildrenAreas();
 	// Add the current Area to Value In Row
@@ -66,69 +78,77 @@ float UPCGRoom::MaxAspectRatioInRow()
 	const float LeftCalc = (ShorterSideSquared * MaxRow)/SumRowSquared;
 	const float RightCalc = SumRowSquared/(ShorterSideSquared * MinRow);
 	return FMath::Max(LeftCalc, RightCalc);
-	
 }
 
-float UPCGRoom::FitRowIntoContainer()
+void APCGRoom::FitRowIntoContainer(const TArray<float>& ChildrenAreaArray, FLayout Container)
 {
-	const int AbsWidth = FMath::Abs(Width);
-	const int AbsBreadth = FMath::Abs(Breadth);
-	const float childrenAreaSum = SumFloat(GetArrayOfChildrenAreas());
-	const int containerArea = AbsBreadth * AbsWidth;
+	const float AbsWidth = FMath::Abs(Container.X1 - Container.X0);
+	const float AbsLength = FMath::Abs(Container.Y1 - Container.Y0);
+	const float ChildrenAreaSum = SumFloat(ChildrenAreaArray);
+	const float ContainerArea = AbsWidth * AbsLength;
 
-	const float occupiedArea = childrenAreaSum / containerArea;
-	if (AbsWidth <= AbsBreadth)
+	const float OccupiedFraction = ChildrenAreaSum / ContainerArea;
+
+	if (AbsWidth <= AbsLength)
 	{
-		Rectangle.Y0 = Rectangle.Y1 - occupiedArea * AbsBreadth;
-		for (UPCGRoom* Child: Children)
+		const float NewY1 = Container.Y1 - OccupiedFraction * AbsLength;
+		float CurrentY1 = NewY1;
+		// Lay out the children vertically along the shorter side of the container
+		for (APCGRoom* Child : RoomChildren)
 		{
-			Child->FitRowIntoContainer();
+			const float ChildArea = Child->Area;
+			const float ChildLength = ChildArea / ChildrenAreaSum * AbsLength;
+			const FLayout NewRectangle = {
+				Container.X0,
+				CurrentY1 - ChildLength,
+				Container.X1,
+				CurrentY1
+			};
+			Child->Rectangle = NewRectangle;
+			Child->Width = Child->Rectangle.X1 - Child->Rectangle.X0;
+			Child->Length = Child->Rectangle.Y1 - Child->Rectangle.Y0;
+			Child->ShorterSide = FMath::Abs(Child->Width) < FMath::Abs(Child->Length) ? Width : Length;
+			Child->Area = Child->Width * Child->Length;
+			// Update CurrentY1 for the next child
+			CurrentY1 -= ChildLength;
+			// Recursively call FitRowIntoContainer for the child
+			// Child->FitRowIntoContainer(Child->GetArrayOfChildrenAreas(), Child->Rectangle);
 		}
 	}
-	
-	return 0;
-}
-
-UPCGRoom::UPCGRoom()
-{
-	Rectangle.X1 = 0;
-	Rectangle.X0 = 0;
-	Rectangle.Y0 = 0;
-	Rectangle.Y1 = 0;
-	Width = Rectangle.X1 - Rectangle.X0;
-	Breadth = Rectangle.Y1 - Rectangle.Y0;
-	ShorterSide = FMath::Abs(Width) < FMath::Abs(Breadth) ? Width : Breadth;
-	Area = Width * Breadth;
-}
-
-UPCGRoom::UPCGRoom(FLayout Rectangle, const ERoomType Type) :
-Rectangle(Rectangle),Type(Type)
-{
-	const float Width = Rectangle.X1 - Rectangle.X0;
-	const float Breadth = Rectangle.Y1 - Rectangle.Y0;
-	ShorterSide = FMath::Abs(Width) < FMath::Abs(Breadth) ? Width : Breadth;
-	Area = Width * Breadth;
-}
-
-UPCGRoom::~UPCGRoom()
-{
-}
-
-int UPCGRoom::SumInt(const TArray<int>& Numbers)
-{
-	int Sum = 0;
-	for (const int Number : Numbers)
+	else
 	{
-		Sum += Number;
+		const float NewX1 = Container.X0 + OccupiedFraction * AbsWidth;
+		float CurrentX0 = NewX1;
+
+		// Lay out the children horizontally along the shorter side of the container
+		for (APCGRoom* Child : RoomChildren)
+		{
+			const float ChildArea = Child->Area;
+			const float ChildWidth = ChildArea / ChildrenAreaSum * AbsWidth;
+			const FLayout NewRectangle = {
+				CurrentX0,
+				Container.Y0,
+				CurrentX0 + ChildWidth,
+				Container.Y1
+			};
+			// Update the child rectangle
+			Child->Rectangle = NewRectangle;
+
+			// Update CurrentX0 for the next child
+			CurrentX0 += ChildWidth;
+
+			// Recursively call FitRowIntoContainer for the child
+			// Child->FitRowIntoContainer(Child->GetArrayOfChildrenAreas(), Child->Rectangle);
+		}
 	}
-	return Sum;
 }
 
-TArray<float> UPCGRoom::GetArrayOfChildrenAreas()
+
+TArray<float> APCGRoom::GetArrayOfChildrenAreas()
 {
 	TArray<float> ValueInRow;
 	// Assuming 'Children' is an array of UPCGRoom objects
-	for (const UPCGRoom* Room : Children)
+	for (const APCGRoom* Room : RoomChildren)
 	{
 		if (Room)
 		{
@@ -140,7 +160,7 @@ TArray<float> UPCGRoom::GetArrayOfChildrenAreas()
 	return ValueInRow;
 }
 
-float UPCGRoom::SumFloat(const TArray<float>& Numbers)
+float APCGRoom::SumFloat(const TArray<float>& Numbers)
 {
 	float Sum = 0;
 	for (const float Number : Numbers)
@@ -149,3 +169,21 @@ float UPCGRoom::SumFloat(const TArray<float>& Numbers)
 	}
 	return Sum;
 }
+
+int APCGRoom::SumInt(const TArray<int>& Numbers)
+{
+	int Sum = 0;
+	for (const int Number : Numbers)
+	{
+		Sum += Number;
+	}
+	return Sum;
+}
+
+// Called when the game starts or when spawned
+void APCGRoom::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
