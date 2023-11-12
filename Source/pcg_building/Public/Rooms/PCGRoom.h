@@ -21,9 +21,13 @@ USTRUCT(BlueprintType)
 struct FLayout
 {
 	GENERATED_BODY()
+	UPROPERTY(EditAnywhere)
 	float X0;
+	UPROPERTY(EditAnywhere)
 	float X1;
+	UPROPERTY(EditAnywhere)
 	float Y0;
+	UPROPERTY(EditAnywhere)
 	float Y1;
 };
 
@@ -36,13 +40,13 @@ public:
 	// Sets default values for this actor's properties
 	APCGRoom();
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="EDIT ROOM PARAMS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Category="EDIT ROOM PARAMS")
 	FLayout Rectangle;
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="EDIT ROOM PARAMS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Category="EDIT ROOM PARAMS")
 	ERoomType Type;
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="EDIT ROOM PARAMS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Category="EDIT ROOM PARAMS")
 	TArray<APCGRoom*> RoomChildren;
 	
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)

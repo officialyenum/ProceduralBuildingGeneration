@@ -14,8 +14,8 @@ APCGBuildingGenerator::APCGBuildingGenerator()
 
 void APCGBuildingGenerator::GenerateBuildingLayout()
 {
-	check(RoomRootNode);
-	GenerateLayoutWithSquarifiedAlgo(RoomRootNode);
+	// check(RoomRootNode);
+	// GenerateLayoutWithSquarifiedAlgo(RoomRootNode);
 }
 
 void APCGBuildingGenerator::GenerateLayoutWithSquarifiedAlgo(APCGRoom* CurrentRoomNode)

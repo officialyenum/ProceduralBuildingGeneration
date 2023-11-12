@@ -6,16 +6,7 @@
 // Sets default values
 APCGRoom::APCGRoom()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
-	Rectangle.X0 = 0;
-	Rectangle.X1 = 4;
-	Rectangle.Y0 = 0;
-	Rectangle.Y1 = 6;
-	Width = Rectangle.X1 - Rectangle.X0;
-	Length = Rectangle.Y1 - Rectangle.Y0;
-	ShorterSide = FMath::Abs(Width) < FMath::Abs(Length) ? Width : Length;
-	Area = Width * Length;
+ 	
 }
 
 float APCGRoom::SumChildrenAreas()
@@ -184,6 +175,10 @@ int APCGRoom::SumInt(const TArray<int>& Numbers)
 void APCGRoom::BeginPlay()
 {
 	Super::BeginPlay();
+
+	Width = Rectangle.X1 - Rectangle.X0;
+	Length = Rectangle.Y1 - Rectangle.Y0;
+	Area = Width * Length;
 	
 }
 
