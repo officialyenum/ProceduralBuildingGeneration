@@ -21,13 +21,13 @@ USTRUCT(BlueprintType)
 struct FLayout
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Layout Points")
 	float X0;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Layout Points")
 	float X1;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Layout Points")
 	float Y0;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Layout Points")
 	float Y1;
 };
 
@@ -36,7 +36,7 @@ class PCG_BUILDING_API APCGRoom : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
+public:
 	// Sets default values for this actor's properties
 	APCGRoom();
 
@@ -47,18 +47,18 @@ public:
 	ERoomType Type;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Category="EDIT ROOM PARAMS")
-	TArray<APCGRoom*> RoomChildren;
-	
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	TArray<APCGRoom*> Points;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EDIT ROOM PARAMS")
 	float Width;
-	
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EDIT ROOM PARAMS")
 	float Length;
-	
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EDIT ROOM PARAMS")
 	float Area;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EDIT ROOM PARAMS")
 	float ShorterSide;
 
 	UFUNCTION(BlueprintCallable, Category="Room Functions")
