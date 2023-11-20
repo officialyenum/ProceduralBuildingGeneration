@@ -47,6 +47,7 @@ public:
 	ERoomType Type;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Category="EDIT ROOM PARAMS")
+<<<<<<< Updated upstream
 	TArray<APCGRoom*> Points;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EDIT ROOM PARAMS")
@@ -59,6 +60,20 @@ public:
 	float Area;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EDIT ROOM PARAMS")
+=======
+	TArray<APCGRoom*> RoomChildren;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Category="EDIT ROOM PARAMS")
+	float Width;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Category="EDIT ROOM PARAMS")
+	float Length;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Category="EDIT ROOM PARAMS")
+	float Area;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,  Category="EDIT ROOM PARAMS")
+>>>>>>> Stashed changes
 	float ShorterSide;
 
 	UFUNCTION(BlueprintCallable, Category="Room Functions")
